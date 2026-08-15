@@ -51,7 +51,7 @@
 }
 
 .animate-progress-bar {
-  animation: horizontalProgress 1.4s ease-in-out infinite;
+  animation: horizontalProgress 0.75s ease-in-out infinite;
   transform-origin: left;
 }
 

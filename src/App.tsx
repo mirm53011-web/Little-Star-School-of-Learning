@@ -52,6 +52,7 @@ import { ContactSection } from './components/public/ContactSection';
 // Admin Components
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Shield, Sparkles, Phone, MapPin, Star, AlertCircle, Loader2 } from 'lucide-react';
 
 const SchoolApp: React.FC = () => {
@@ -231,22 +232,28 @@ const SchoolApp: React.FC = () => {
     }
 
     if (!user) {
-      return <AdminLogin onBackToWebsite={handleBackToWebsite} />;
+      return (
+        <ErrorBoundary name="Admin Login" variant="fullscreen">
+          <AdminLogin onBackToWebsite={handleBackToWebsite} />
+        </ErrorBoundary>
+      );
     }
 
     return (
-      <AdminDashboard
-        schoolInfo={schoolInfo}
-        heroSlides={heroSlides}
-        academics={academics}
-        admissions={admissions}
-        resources={resources}
-        notices={notices}
-        events={events}
-        gallery={gallery}
-        enquiries={enquiries}
-        onBackToWebsite={handleBackToWebsite}
-      />
+      <ErrorBoundary name="Admin Portal" variant="fullscreen">
+        <AdminDashboard
+          schoolInfo={schoolInfo}
+          heroSlides={heroSlides}
+          academics={academics}
+          admissions={admissions}
+          resources={resources}
+          notices={notices}
+          events={events}
+          gallery={gallery}
+          enquiries={enquiries}
+          onBackToWebsite={handleBackToWebsite}
+        />
+      </ErrorBoundary>
     );
   }
 
@@ -257,84 +264,110 @@ const SchoolApp: React.FC = () => {
       <ScrollProgressIndicator activeSection={activeSection} onNavigate={scrollToSection} />
 
       {/* Main Header / Navigation with sticky positioning and responsive layout */}
-      <Navbar
-        schoolInfo={schoolInfo}
-        activeSection={activeSection}
-        onNavigate={scrollToSection}
-      />
+      <ErrorBoundary name="Navigation Header" variant="card">
+        <Navbar
+          schoolInfo={schoolInfo}
+          activeSection={activeSection}
+          onNavigate={scrollToSection}
+        />
+      </ErrorBoundary>
 
       {/* Public Page Content */}
       <main className="flex-1 overflow-x-hidden w-full">
         {/* Section 1: Hero Carousel */}
-        <HeroCarousel
-          slides={heroSlides}
-          onNavigate={scrollToSection}
-        />
+        <ErrorBoundary name="Hero Banner" variant="section">
+          <HeroCarousel
+            slides={heroSlides}
+            onNavigate={scrollToSection}
+          />
+        </ErrorBoundary>
 
         {/* Section 2: About School */}
-        <AboutSection
-          schoolInfo={schoolInfo}
-          onNavigate={scrollToSection}
-        />
+        <ErrorBoundary name="About Section" variant="section">
+          <AboutSection
+            schoolInfo={schoolInfo}
+            onNavigate={scrollToSection}
+          />
+        </ErrorBoundary>
 
         {/* Section 3: Principal's Message */}
-        <PrincipalMessageSection
-          schoolInfo={schoolInfo}
-          onNavigate={scrollToSection}
-        />
+        <ErrorBoundary name="Principal's Message" variant="section">
+          <PrincipalMessageSection
+            schoolInfo={schoolInfo}
+            onNavigate={scrollToSection}
+          />
+        </ErrorBoundary>
 
         {/* Section 4: Academic Curriculum */}
-        <AcademicsSection
-          levels={academics}
-          onNavigate={scrollToSection}
-        />
+        <ErrorBoundary name="Academic Wings" variant="section">
+          <AcademicsSection
+            levels={academics}
+            onNavigate={scrollToSection}
+          />
+        </ErrorBoundary>
 
         {/* Section 5: Admissions Guide */}
-        <AdmissionsSection
-          admissionsInfo={admissions}
-          schoolInfo={schoolInfo}
-          onNavigate={scrollToSection}
-        />
+        <ErrorBoundary name="Admissions Portal" variant="section">
+          <AdmissionsSection
+            admissionsInfo={admissions}
+            schoolInfo={schoolInfo}
+            onNavigate={scrollToSection}
+          />
+        </ErrorBoundary>
 
         {/* Section 6: Student Resource & Downloads Portal */}
-        <StudentResourcesSection
-          resources={resources}
-        />
+        <ErrorBoundary name="Student Resources" variant="section">
+          <StudentResourcesSection
+            resources={resources}
+          />
+        </ErrorBoundary>
 
         {/* Section 7: Notice Board & Circulars */}
-        <NoticeBoardSection
-          notices={notices}
-        />
+        <ErrorBoundary name="Notice Board" variant="section">
+          <NoticeBoardSection
+            notices={notices}
+          />
+        </ErrorBoundary>
 
         {/* Section 8: Campus Events & Calendar */}
-        <EventsSection
-          events={events}
-        />
+        <ErrorBoundary name="Events & Calendar" variant="section">
+          <EventsSection
+            events={events}
+          />
+        </ErrorBoundary>
 
         {/* Section 9: Photo Gallery */}
-        <GallerySection
-          gallery={gallery}
-        />
+        <ErrorBoundary name="Photo Gallery" variant="section">
+          <GallerySection
+            gallery={gallery}
+          />
+        </ErrorBoundary>
 
         {/* Section 10: Contact & Admission Enquiry */}
-        <ContactSection
-          schoolInfo={schoolInfo}
-        />
+        <ErrorBoundary name="Contact & Enquiry" variant="section">
+          <ContactSection
+            schoolInfo={schoolInfo}
+          />
+        </ErrorBoundary>
       </main>
 
       {/* Footer */}
-      <Footer
-        schoolInfo={schoolInfo}
-        onNavigate={scrollToSection}
-      />
+      <ErrorBoundary name="Footer" variant="card">
+        <Footer
+          schoolInfo={schoolInfo}
+          onNavigate={scrollToSection}
+        />
+      </ErrorBoundary>
     </div>
   );
 };
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SchoolApp />
-    </AuthProvider>
+    <ErrorBoundary name="Little Star School of Learning" variant="fullscreen">
+      <AuthProvider>
+        <SchoolApp />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

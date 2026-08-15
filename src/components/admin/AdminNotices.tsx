@@ -37,6 +37,7 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const openCreate = () => {
     setEditingNotice(null);
@@ -50,6 +51,7 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
     setAttachmentName('');
     setEnabled(true);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
@@ -65,12 +67,14 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
     setAttachmentName(n.attachmentName || '');
     setEnabled(n.enabled);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMessage(null);
     try {
       let finalAttachmentUrl = attachmentUrl;
       let finalAttachmentName = attachmentName;
@@ -95,8 +99,9 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
       });
 
       setIsModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save notice:', err);
+      setErrorMessage(err?.message || 'Failed to save notice circular.');
     } finally {
       setSaving(false);
     }
@@ -307,20 +312,35 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
                 </label>
               </div>
 
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
+                  disabled={saving}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                 >
-                  {saving ? 'Saving...' : 'Save Circular'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>Save Circular</span>
+                  )}
                 </button>
               </div>
             </form>

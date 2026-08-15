@@ -250,26 +250,52 @@ export async function forceSyncAllSchoolDataToFirestore(): Promise<{
   }
 }
 
-// Check Firestore Connectivity
+// Last sync timestamp tracking for UI diagnostics
+let lastSyncTimestamp: Date = new Date();
+const syncListeners: ((timestamp: Date) => void)[] = [];
+
+export function recordSyncActivity(): void {
+  lastSyncTimestamp = new Date();
+  syncListeners.forEach(listener => listener(lastSyncTimestamp));
+}
+
+export function subscribeSyncActivity(callback: (timestamp: Date) => void): () => void {
+  callback(lastSyncTimestamp);
+  syncListeners.push(callback);
+  return () => {
+    const idx = syncListeners.indexOf(callback);
+    if (idx !== -1) syncListeners.splice(idx, 1);
+  };
+}
+
+// Check Firestore Connectivity with real live ping
 export async function checkFirestoreConnection(): Promise<{
   connected: boolean;
   projectId: string;
   authDomain: string;
+  latencyMs?: number;
+  lastChecked: string;
   error?: string;
 }> {
+  const startTime = Date.now();
   try {
     const testDoc = await getDoc(doc(db, 'school_info', 'main'));
+    const latency = Date.now() - startTime;
+    recordSyncActivity();
     return {
       connected: true,
-      projectId: (db as any).app?.options?.projectId || 'Connected',
-      authDomain: (db as any).app?.options?.authDomain || ''
+      projectId: (db as any).app?.options?.projectId || 'little-star-school-of-learning',
+      authDomain: (db as any).app?.options?.authDomain || 'little-star-school-of-learning.firebaseapp.com',
+      latencyMs: latency,
+      lastChecked: new Date().toLocaleTimeString()
     };
   } catch (err: any) {
     return {
       connected: false,
-      projectId: (db as any).app?.options?.projectId || 'Error',
-      authDomain: '',
-      error: err?.message || 'Connection failed'
+      projectId: (db as any).app?.options?.projectId || 'little-star-school-of-learning',
+      authDomain: (db as any).app?.options?.authDomain || '',
+      lastChecked: new Date().toLocaleTimeString(),
+      error: err?.message || 'Connection timeout / network error'
     };
   }
 }
@@ -281,6 +307,7 @@ export async function checkFirestoreConnection(): Promise<{
 export function subscribeSchoolInfo(callback: (info: SchoolInfo) => void) {
   const docRef = doc(db, 'school_info', 'main');
   return onSnapshot(docRef, (snapshot) => {
+    recordSyncActivity();
     if (snapshot.exists()) {
       callback(snapshot.data() as SchoolInfo);
     } else {
@@ -295,6 +322,7 @@ export function subscribeSchoolInfo(callback: (info: SchoolInfo) => void) {
 export function subscribeAdmissions(callback: (info: AdmissionInfo) => void) {
   const docRef = doc(db, 'admissions', 'main');
   return onSnapshot(docRef, (snapshot) => {
+    recordSyncActivity();
     if (snapshot.exists()) {
       callback(snapshot.data() as AdmissionInfo);
     } else {
@@ -309,6 +337,7 @@ export function subscribeAdmissions(callback: (info: AdmissionInfo) => void) {
 export function subscribeHeroSlides(callback: (slides: HeroSlide[]) => void) {
   const colRef = collection(db, 'hero_slides');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as HeroSlide));
       items.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -325,6 +354,7 @@ export function subscribeHeroSlides(callback: (slides: HeroSlide[]) => void) {
 export function subscribeAcademics(callback: (levels: AcademicLevel[]) => void) {
   const colRef = collection(db, 'academics');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as AcademicLevel));
       items.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -341,6 +371,7 @@ export function subscribeAcademics(callback: (levels: AcademicLevel[]) => void) 
 export function subscribeNotices(callback: (notices: NoticeItem[]) => void) {
   const colRef = collection(db, 'notices');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as NoticeItem));
       // Sort pinned first, then newest publishDate
@@ -361,6 +392,7 @@ export function subscribeNotices(callback: (notices: NoticeItem[]) => void) {
 export function subscribeResources(callback: (resources: StudentResource[]) => void) {
   const colRef = collection(db, 'resources');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as StudentResource));
       items.sort((a, b) => new Date(b.publishDate || 0).getTime() - new Date(a.publishDate || 0).getTime());
@@ -377,6 +409,7 @@ export function subscribeResources(callback: (resources: StudentResource[]) => v
 export function subscribeEvents(callback: (events: SchoolEvent[]) => void) {
   const colRef = collection(db, 'events');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as SchoolEvent));
       items.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -393,6 +426,7 @@ export function subscribeEvents(callback: (events: SchoolEvent[]) => void) {
 export function subscribeGallery(callback: (items: GalleryItem[]) => void) {
   const colRef = collection(db, 'gallery');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     if (!snapshot.empty) {
       const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as GalleryItem));
       items.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
@@ -415,6 +449,7 @@ export function subscribeEnquiries(callback: (items: EnquirySubmission[]) => voi
 
   const colRef = collection(db, 'enquiries');
   return onSnapshot(colRef, (snapshot) => {
+    recordSyncActivity();
     const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as EnquirySubmission));
     items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     callback(items);

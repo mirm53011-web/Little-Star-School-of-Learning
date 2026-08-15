@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Save, Check, Plus, Trash2, Calendar, FileText } from 'lucide-react';
+import { Sparkles, Save, Check, Plus, Trash2, Calendar, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { AdmissionInfo } from '../../types';
 import { updateAdmissionsInfo } from '../../lib/schoolDataService';
 
@@ -22,6 +22,7 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleAddDate = () => {
     setImportantDates([...importantDates, { event: 'New Milestone', date: 'Date / Period' }]);
@@ -41,6 +42,7 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
     e.preventDefault();
     setSaving(true);
     setSuccess(false);
+    setErrorMessage(null);
 
     try {
       const eligibilityCriteria = eligibilityText
@@ -65,8 +67,9 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update admissions:', err);
+      setErrorMessage(err?.message || 'Failed to save admissions info.');
     } finally {
       setSaving(false);
     }
@@ -210,14 +213,37 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
           </div>
         </div>
 
-        <div className="flex justify-end">
+        {errorMessage && (
+          <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-2">
+          {success ? (
+            <div className="flex items-center space-x-1.5 text-emerald-600 font-bold text-xs">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>Admissions criteria updated in real time!</span>
+            </div>
+          ) : <div />}
+
           <button
             type="submit"
             disabled={saving}
             className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3 rounded-2xl text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            <span>Save Admissions Settings</span>
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <span>Saving Admissions...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Admissions Settings</span>
+              </>
+            )}
           </button>
         </div>
       </form>

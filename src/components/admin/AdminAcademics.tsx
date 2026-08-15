@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GraduationCap, Edit2, Plus, Trash2, Check, X, Layers } from 'lucide-react';
+import { GraduationCap, Edit2, Plus, Trash2, Check, X, Layers, Loader2, AlertCircle } from 'lucide-react';
 import { AcademicLevel } from '../../types';
 import { saveAcademicLevel, deleteAcademicLevel } from '../../lib/schoolDataService';
 
@@ -20,6 +20,10 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
   const [order, setOrder] = useState(1);
   const [enabled, setEnabled] = useState(true);
 
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const openEdit = (lvl: AcademicLevel) => {
     setEditingLevel(lvl);
     setTitle(lvl.title);
@@ -30,11 +34,15 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
     setHighlightsText(lvl.highlights.join('\n'));
     setOrder(lvl.order || 1);
     setEnabled(lvl.enabled);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
+    setErrorMessage(null);
+
     const highlights = highlightsText
       .split('\n')
       .map(h => h.trim())
@@ -53,9 +61,14 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
         order: Number(order),
         enabled
       });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
       setIsModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save academic level:', err);
+      setErrorMessage(err?.message || 'Failed to save academic wing. Please check network.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -196,19 +209,35 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
                 </label>
               </div>
 
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
+                  disabled={saving}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl"
+                  disabled={saving}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl flex items-center space-x-1.5 disabled:opacity-50"
                 >
-                  Update Wing
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <span>Update Wing</span>
+                  )}
                 </button>
               </div>
             </form>

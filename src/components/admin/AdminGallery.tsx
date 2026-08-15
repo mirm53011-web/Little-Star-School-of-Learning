@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, Plus, Trash2, Edit2, X, Loader2 } from 'lucide-react';
+import { Camera, Plus, Trash2, Edit2, X, Loader2, AlertCircle } from 'lucide-react';
 import { GalleryItem } from '../../types';
 import { saveGalleryItem, deleteGalleryItem } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
@@ -20,6 +20,7 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const categories = [
     'Campus',
@@ -39,6 +40,7 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
     setImageUrl('https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=80');
     setEnabled(true);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
@@ -50,12 +52,14 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
     setImageUrl(item.imageUrl);
     setEnabled(item.enabled);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMessage(null);
     try {
       let finalImg = imageUrl;
       if (selectedFile) {
@@ -74,8 +78,9 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
       });
 
       setIsModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save photo:', err);
+      setErrorMessage(err?.message || 'Failed to save gallery photo.');
     } finally {
       setSaving(false);
     }
@@ -239,20 +244,35 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
                 </label>
               </div>
 
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
+                  disabled={saving}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 rounded-xl disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                 >
-                  {saving ? 'Saving...' : 'Save Photo'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>Save Photo</span>
+                  )}
                 </button>
               </div>
             </form>

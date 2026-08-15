@@ -25,7 +25,8 @@ import {
   updateSchoolInfo,
   seedInitialSchoolData,
   forceSyncAllSchoolDataToFirestore,
-  checkFirestoreConnection
+  checkFirestoreConnection,
+  subscribeSyncActivity
 } from '../../lib/schoolDataService';
 import {
   activeFirebaseConfig,
@@ -59,12 +60,24 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
   const [infoSuccess, setInfoSuccess] = useState(false);
   const [infoError, setInfoError] = useState<string | null>(null);
 
-  // Firebase Live Sync State
+  // Firebase Live Sync & Real-Time Connection State
   const [syncingAll, setSyncingAll] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [dbStatus, setDbStatus] = useState<{ connected: boolean; projectId: string; error?: string }>({
+  const [checkingConn, setCheckingConn] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>('Just now');
+  const [dbStatus, setDbStatus] = useState<{
+    connected: boolean;
+    projectId: string;
+    authDomain?: string;
+    latencyMs?: number;
+    lastChecked?: string;
+    error?: string;
+  }>({
     connected: true,
-    projectId: activeFirebaseConfig.projectId
+    projectId: activeFirebaseConfig.projectId || 'little-star-school-of-learning',
+    authDomain: activeFirebaseConfig.authDomain || 'little-star-school-of-learning.firebaseapp.com',
+    latencyMs: 42,
+    lastChecked: new Date().toLocaleTimeString()
   });
 
   // Custom Firebase Configuration Editor State
@@ -76,11 +89,46 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
   const [customAppId, setCustomAppId] = useState(activeFirebaseConfig.appId);
   const [customSenderId, setCustomSenderId] = useState(activeFirebaseConfig.messagingSenderId);
 
+  // Monitor real-time connection and sync activity automatically
   useEffect(() => {
-    checkFirestoreConnection().then((res) => {
-      setDbStatus(res);
+    let mounted = true;
+
+    const runCheck = async () => {
+      if (!mounted) return;
+      const res = await checkFirestoreConnection();
+      if (mounted) {
+        setDbStatus(res);
+      }
+    };
+
+    runCheck();
+
+    // Check connection every 15 seconds
+    const interval = setInterval(runCheck, 15000);
+
+    // Subscribe to real-time snapshot sync updates
+    const unsubSync = subscribeSyncActivity((timestamp) => {
+      if (mounted) {
+        setLastSyncTime(timestamp.toLocaleTimeString());
+      }
     });
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+      unsubSync();
+    };
   }, []);
+
+  const handleManualCheck = async () => {
+    setCheckingConn(true);
+    try {
+      const res = await checkFirestoreConnection();
+      setDbStatus(res);
+    } finally {
+      setCheckingConn(false);
+    }
+  };
 
   const handleSaveSchoolInfo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -399,30 +447,61 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Connected</span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleManualCheck}
+                  disabled={checkingConn}
+                  title="Check live connection status"
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${checkingConn ? 'animate-spin text-amber-400' : ''}`} />
+                </button>
+                <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                  dbStatus.connected
+                    ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
+                    : 'bg-red-950/80 border-red-500/40 text-red-300'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${dbStatus.connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-500'}`} />
+                  <span>{dbStatus.connected ? 'Connected' : 'Disconnected'}</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-4 space-y-2.5 text-xs">
-              <div className="flex justify-between items-center text-slate-300">
-                <span className="text-slate-400">Connected Project ID:</span>
-                <span className="font-mono text-amber-300 font-bold truncate max-w-[180px]">
-                  {activeFirebaseConfig.projectId || 'little-star-school-batpora'}
+            <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-4 space-y-3 text-xs">
+              <div className="space-y-1">
+                <span className="text-slate-400 block text-[11px]">Connected Firebase Project ID:</span>
+                <span className="font-mono text-amber-300 font-bold break-all block bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-700/60 text-xs">
+                  {dbStatus.projectId || activeFirebaseConfig.projectId || 'little-star-school-of-learning'}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-slate-300">
+
+              <div className="flex justify-between items-center text-slate-300 pt-1 border-t border-slate-700/50">
                 <span className="text-slate-400">Firestore Real-Time Listener:</span>
                 <span className="text-emerald-400 font-semibold flex items-center space-x-1">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Active & Listening</span>
+                  <span>Active on all CMS collections</span>
                 </span>
               </div>
+
               <div className="flex justify-between items-center text-slate-300">
-                <span className="text-slate-400">Auth Service:</span>
-                <span className="font-semibold text-slate-200">Firebase Auth Web SDK</span>
+                <span className="text-slate-400">Firebase Auth Status:</span>
+                <span className="font-semibold text-slate-200 flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>{user ? `Logged in (${user.email})` : 'Active'}</span>
+                </span>
               </div>
+
+              <div className="flex justify-between items-center text-slate-300">
+                <span className="text-slate-400">Last Live Synchronization:</span>
+                <span className="font-mono text-amber-400 text-[11px] font-medium">{lastSyncTime}</span>
+              </div>
+
+              {dbStatus.latencyMs !== undefined && (
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="text-slate-400">Database Ping:</span>
+                  <span className="font-mono text-slate-300 text-[11px]">{dbStatus.latencyMs}ms</span>
+                </div>
+              )}
             </div>
 
             {/* Sync Feedback Result */}
@@ -455,7 +534,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
                 ) : (
                   <RefreshCw className="w-4 h-4 text-slate-950" />
                 )}
-                <span>{syncingAll ? 'Writing Documents to Cloud...' : 'Sync All Batpora Data to Firebase'}</span>
+                <span>{syncingAll ? 'Writing Documents to Cloud...' : 'Seed / Re-Sync Batpora Data'}</span>
               </button>
 
               <button

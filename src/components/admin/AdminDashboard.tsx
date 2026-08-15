@@ -44,6 +44,7 @@ import { AdminGallery } from './AdminGallery';
 import { AdminEnquiries } from './AdminEnquiries';
 import { AdminSettings } from './AdminSettings';
 import { AdminAccountSecurity } from './AdminAccountSecurity';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 
 interface AdminDashboardProps {
   schoolInfo: SchoolInfo;
@@ -261,30 +262,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Tab Content Container */}
         <div className="p-4 sm:p-6 lg:p-8 flex-1 max-w-7xl w-full mx-auto">
-          {activeTab === 'overview' && (
-            <AdminOverview
-              enquiries={enquiries}
-              notices={notices}
-              resources={resources}
-              gallery={gallery}
-              events={events}
-              slides={heroSlides}
-              schoolInfo={schoolInfo}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
+          <ErrorBoundary
+            key={activeTab}
+            name={`Admin: ${navItems.find(i => i.id === activeTab)?.label || 'Module'}`}
+            variant="section"
+          >
+            {activeTab === 'overview' && (
+              <AdminOverview
+                enquiries={enquiries}
+                notices={notices}
+                resources={resources}
+                gallery={gallery}
+                events={events}
+                slides={heroSlides}
+                schoolInfo={schoolInfo}
+                onNavigateTab={(tab) => setActiveTab(tab)}
+              />
+            )}
 
-          {activeTab === 'hero' && <AdminHeroSlides slides={heroSlides} />}
-          {activeTab === 'principal' && <AdminAboutPrincipal schoolInfo={schoolInfo} />}
-          {activeTab === 'academics' && <AdminAcademics levels={academics} />}
-          {activeTab === 'admissions' && <AdminAdmissions admissionsInfo={admissions} />}
-          {activeTab === 'resources' && <AdminResources resources={resources} />}
-          {activeTab === 'notices' && <AdminNotices notices={notices} />}
-          {activeTab === 'events' && <AdminEvents events={events} />}
-          {activeTab === 'gallery' && <AdminGallery gallery={gallery} />}
-          {activeTab === 'enquiries' && <AdminEnquiries enquiries={enquiries} />}
-          {activeTab === 'settings' && <AdminSettings schoolInfo={schoolInfo} />}
-          {activeTab === 'security' && <AdminAccountSecurity />}
+            {activeTab === 'hero' && <AdminHeroSlides slides={heroSlides} />}
+            {activeTab === 'principal' && <AdminAboutPrincipal schoolInfo={schoolInfo} />}
+            {activeTab === 'academics' && <AdminAcademics levels={academics} />}
+            {activeTab === 'admissions' && <AdminAdmissions admissionsInfo={admissions} />}
+            {activeTab === 'resources' && <AdminResources resources={resources} />}
+            {activeTab === 'notices' && <AdminNotices notices={notices} />}
+            {activeTab === 'events' && <AdminEvents events={events} />}
+            {activeTab === 'gallery' && <AdminGallery gallery={gallery} />}
+            {activeTab === 'enquiries' && <AdminEnquiries enquiries={enquiries} />}
+            {activeTab === 'settings' && <AdminSettings schoolInfo={schoolInfo} />}
+            {activeTab === 'security' && <AdminAccountSecurity />}
+          </ErrorBoundary>
         </div>
       </main>
     </div>

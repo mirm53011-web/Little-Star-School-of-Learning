@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Sparkles, Plus, Trash2, Edit2, Check, X, Eye, EyeOff, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Plus, Trash2, Edit2, Check, X, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import { HeroSlide } from '../../types';
 import { saveHeroSlide, deleteHeroSlide } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
+import { HorizontalProgressBar } from '../common/HorizontalProgressBar';
 
 interface AdminHeroSlidesProps {
   slides: HeroSlide[];
@@ -276,6 +277,12 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
                 />
               </div>
 
+              {saving && (
+                <div className="pt-2">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Saving slide to Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-3 flex items-center justify-end space-x-3 border-t border-slate-100">
                 <button
                   type="button"
@@ -290,10 +297,7 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Saving Slide...</span>
-                    </>
+                    <span>Saving...</span>
                   ) : (
                     <span>Save Slide</span>
                   )}

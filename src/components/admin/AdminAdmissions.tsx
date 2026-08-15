@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Sparkles, Save, Check, Plus, Trash2, Calendar, FileText, Loader2, AlertCircle } from 'lucide-react';
+import { Sparkles, Save, Check, Plus, Trash2, Calendar, FileText, AlertCircle } from 'lucide-react';
 import { AdmissionInfo } from '../../types';
 import { updateAdmissionsInfo } from '../../lib/schoolDataService';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminAdmissionsProps {
   admissionsInfo: AdmissionInfo;
@@ -220,6 +221,12 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
           </div>
         )}
 
+        {saving && (
+          <div className="pt-2">
+            <HorizontalProgressBar variant="amber" height="xs" label="Saving admissions configuration to Firestore..." showStarGlow={false} />
+          </div>
+        )}
+
         <div className="flex items-center justify-between pt-2">
           {success ? (
             <div className="flex items-center space-x-1.5 text-emerald-600 font-bold text-xs">
@@ -231,13 +238,12 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
           <button
             type="submit"
             disabled={saving}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3 rounded-2xl text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50"
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3 rounded-2xl text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50 transition-all"
           >
             {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                <span>Saving Admissions...</span>
-              </>
+              <ActionButtonProgress label="Saving Admissions..." />
+            ) : success ? (
+              <ActionButtonProgress isCompleted completedLabel="Saved ✓" />
             ) : (
               <>
                 <Save className="w-4 h-4" />

@@ -8,11 +8,11 @@ import {
   ArrowRight,
   AlertCircle,
   CheckCircle2,
-  Loader2,
   HelpCircle,
   UserPlus
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { HorizontalProgressBar } from '../common/HorizontalProgressBar';
 
 interface AdminLoginProps {
   onBackToWebsite: () => void;
@@ -152,6 +152,12 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBackToWebsite }) => {
                 </div>
               </div>
 
+              {loading && (
+                <div className="pt-1">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Sending reset email..." showStarGlow={false} />
+                </div>
+              )}
+
               <button
                 id="send-password-reset-btn"
                 type="submit"
@@ -159,7 +165,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBackToWebsite }) => {
                 className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  <span>Sending Reset Email...</span>
                 ) : (
                   <span>Send Reset Email</span>
                 )}
@@ -233,6 +239,17 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBackToWebsite }) => {
                 </div>
               </div>
 
+              {loading && (
+                <div className="pt-1">
+                  <HorizontalProgressBar
+                    variant="amber"
+                    height="xs"
+                    label={isFirstTimeSetup ? 'Creating master account...' : 'Verifying credentials...'}
+                    showStarGlow={false}
+                  />
+                </div>
+              )}
+
               <button
                 id="admin-login-submit-btn"
                 type="submit"
@@ -240,10 +257,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onBackToWebsite }) => {
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold py-3.5 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50 mt-2"
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                    <span>Verifying Credentials...</span>
-                  </>
+                  <span>{isFirstTimeSetup ? 'Creating Master Admin...' : 'Authenticating...'}</span>
                 ) : (
                   <>
                     <span>{isFirstTimeSetup ? 'Create Master Admin' : 'Access Admin Dashboard'}</span>

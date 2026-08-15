@@ -11,14 +11,15 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   RefreshCw,
   Award,
   Sparkles,
   Database,
   Cloud,
   Check,
-  RotateCcw
+  RotateCcw,
+  Activity,
+  Radio
 } from 'lucide-react';
 import { SchoolInfo } from '../../types';
 import {
@@ -28,6 +29,7 @@ import {
   checkFirestoreConnection,
   subscribeSyncActivity
 } from '../../lib/schoolDataService';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 import {
   activeFirebaseConfig,
   saveCustomFirebaseConfig,
@@ -416,19 +418,38 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
               />
             </div>
 
-            <button
-              id="save-school-profile-btn"
-              type="submit"
-              disabled={savingInfo}
-              className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 cursor-pointer shadow"
-            >
-              {savingInfo ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : (
-                <Save className="w-4 h-4" />
+            {savingInfo && (
+              <div className="pt-2">
+                <HorizontalProgressBar variant="amber" height="xs" label="Saving profile directly to Firestore..." showStarGlow={false} />
+              </div>
+            )}
+
+            <div className="flex items-center space-x-3">
+              <button
+                id="save-school-profile-btn"
+                type="submit"
+                disabled={savingInfo}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 cursor-pointer shadow"
+              >
+                {savingInfo ? (
+                  <ActionButtonProgress label="Saving Profile..." className="text-white" />
+                ) : infoSuccess ? (
+                  <ActionButtonProgress isCompleted completedLabel="Saved ✓" className="text-white" />
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Save School Profile</span>
+                  </>
+                )}
+              </button>
+
+              {infoSuccess && (
+                <span className="text-xs font-bold text-emerald-600 flex items-center space-x-1">
+                  <Check className="w-4 h-4" />
+                  <span>Updated in Firestore real-time!</span>
+                </span>
               )}
-              <span>{savingInfo ? 'Saving...' : 'Save School Profile'}</span>
-            </button>
+            </div>
           </form>
         </div>
 
@@ -443,7 +464,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white font-display">Firebase Cloud Connection</h3>
-                  <p className="text-xs text-slate-400">Real-Time Data Engine</p>
+                  <p className="text-xs text-slate-400">Real-Time Firestore & Auth Engine</p>
                 </div>
               </div>
 
@@ -452,9 +473,10 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
                   onClick={handleManualCheck}
                   disabled={checkingConn}
                   title="Check live connection status"
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors disabled:opacity-50"
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors disabled:opacity-50 flex items-center space-x-1"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${checkingConn ? 'animate-spin text-amber-400' : ''}`} />
+                  <Activity className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{checkingConn ? 'Pinging...' : 'Ping'}</span>
                 </button>
                 <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
                   dbStatus.connected
@@ -467,165 +489,207 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
               </div>
             </div>
 
+            {checkingConn && (
+              <HorizontalProgressBar variant="amber" height="xs" label="Testing live Firestore connection latency..." showStarGlow={false} />
+            )}
+
             <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-4 space-y-3 text-xs">
               <div className="space-y-1">
-                <span className="text-slate-400 block text-[11px]">Connected Firebase Project ID:</span>
+                <span className="text-slate-400 block text-[11px]">Firebase Project ID:</span>
                 <span className="font-mono text-amber-300 font-bold break-all block bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-700/60 text-xs">
                   {dbStatus.projectId || activeFirebaseConfig.projectId || 'little-star-school-of-learning'}
                 </span>
               </div>
 
               <div className="flex justify-between items-center text-slate-300 pt-1 border-t border-slate-700/50">
-                <span className="text-slate-400">Firestore Real-Time Listener:</span>
+                <span className="text-slate-400">Firestore Status:</span>
                 <span className="text-emerald-400 font-semibold flex items-center space-x-1">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Active on all CMS collections</span>
+                  <span>{dbStatus.connected ? 'Online & Synchronized' : 'Reconnecting...'}</span>
                 </span>
               </div>
 
               <div className="flex justify-between items-center text-slate-300">
-                <span className="text-slate-400">Firebase Auth Status:</span>
+                <span className="text-slate-400">Real-Time Listeners:</span>
+                <span className="text-amber-400 font-semibold flex items-center space-x-1">
+                  <Radio className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                  <span>Active (8 onSnapshot channels)</span>
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center text-slate-300">
+                <span className="text-slate-400">Firebase Authentication:</span>
                 <span className="font-semibold text-slate-200 flex items-center space-x-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span>{user ? `Logged in (${user.email})` : 'Active'}</span>
+                  <span>{user ? `Authenticated (${user.email})` : 'Secured (Admin Protected)'}</span>
                 </span>
               </div>
 
               <div className="flex justify-between items-center text-slate-300">
-                <span className="text-slate-400">Last Live Synchronization:</span>
+                <span className="text-slate-400">Last Live Firestore Activity:</span>
                 <span className="font-mono text-amber-400 text-[11px] font-medium">{lastSyncTime}</span>
               </div>
 
               {dbStatus.latencyMs !== undefined && (
                 <div className="flex justify-between items-center text-slate-300">
-                  <span className="text-slate-400">Database Ping:</span>
-                  <span className="font-mono text-slate-300 text-[11px]">{dbStatus.latencyMs}ms</span>
+                  <span className="text-slate-400">Database Ping / Latency:</span>
+                  <span className="font-mono text-emerald-400 text-[11px]">{dbStatus.latencyMs}ms (Ultra Fast)</span>
                 </div>
               )}
             </div>
 
-            {/* Sync Feedback Result */}
-            {syncResult && (
-              <div
-                className={`p-3 rounded-2xl text-xs flex items-start space-x-2 ${
-                  syncResult.success
-                    ? 'bg-emerald-950/80 border border-emerald-500/60 text-emerald-200'
-                    : 'bg-red-950/80 border border-red-500/60 text-red-200'
-                }`}
-              >
-                {syncResult.success ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                )}
-                <span>{syncResult.message}</span>
-              </div>
-            )}
+            {/* Note confirming direct real-time saving */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 space-y-1.5">
+              <p className="font-semibold text-amber-300 flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Instant Real-Time Production CMS</span>
+              </p>
+              <p className="text-slate-400 leading-relaxed">
+                When you click Save or Update in any section, data writes directly to Firestore. The public website updates instantly via real-time listeners without requiring manual page refreshes, manual cloud-sync buttons, or redeployments.
+              </p>
+            </div>
 
             <div className="space-y-3 pt-1">
-              <button
-                id="sync-all-to-firebase-btn"
-                onClick={handleForceSyncAll}
-                disabled={syncingAll}
-                className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition-all shadow-lg cursor-pointer disabled:opacity-50"
-              >
-                {syncingAll ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                ) : (
-                  <RefreshCw className="w-4 h-4 text-slate-950" />
-                )}
-                <span>{syncingAll ? 'Writing Documents to Cloud...' : 'Seed / Re-Sync Batpora Data'}</span>
-              </button>
-
               <button
                 onClick={() => setShowConfigModal(!showConfigModal)}
                 className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer border border-slate-700"
               >
                 <Settings className="w-3.5 h-3.5 text-amber-400" />
-                <span>{showConfigModal ? 'Hide Firebase Config' : 'View / Edit Firebase Project Config'}</span>
+                <span>{showConfigModal ? 'Hide Advanced Cloud Tools' : 'Advanced Firebase & Migration Tools'}</span>
               </button>
             </div>
 
-            {/* Custom Firebase Credentials Form */}
+            {/* Advanced Migration / Seed & Config Form */}
             {showConfigModal && (
-              <form onSubmit={handleSaveCustomFirebase} className="pt-3 border-t border-slate-800 space-y-3 animate-fade-in">
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Enter credentials from your Firebase Console if you wish to connect your own project directly:
-                </p>
+              <div className="pt-3 border-t border-slate-800 space-y-4 animate-fade-in text-xs">
+                {/* One-time Migration / Seed Section */}
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-amber-400 text-[11px] uppercase">Optional Initial Seed Tool</span>
+                    <span className="text-[10px] text-slate-500">Migration only</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Use this one-time tool only if you wish to reset or re-seed baseline Batpora data across empty collections.
+                  </p>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-amber-300 uppercase mb-1">
-                    Firebase Project ID
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customProjectId}
-                    onChange={(e) => setCustomProjectId(e.target.value)}
-                    placeholder="e.g. little-star-school-batpora"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
-                  />
+                  {syncingAll && (
+                    <HorizontalProgressBar variant="amber" height="xs" label="Seeding all collections in Firestore..." showStarGlow={false} />
+                  )}
+
+                  <button
+                    id="seed-migration-btn"
+                    onClick={handleForceSyncAll}
+                    disabled={syncingAll}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center space-x-2 border border-slate-700 disabled:opacity-50 cursor-pointer"
+                  >
+                    {syncingAll ? (
+                      <span>Seeding collections in progress...</span>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Re-Seed Initial Data (One-Time)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {syncResult && (
+                    <div
+                      className={`p-2.5 rounded-lg text-[11px] flex items-start space-x-2 ${
+                        syncResult.success
+                          ? 'bg-emerald-950/80 border border-emerald-500/60 text-emerald-200'
+                          : 'bg-red-950/80 border border-red-500/60 text-red-200'
+                      }`}
+                    >
+                      {syncResult.success ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0 mt-0.5" />
+                      )}
+                      <span>{syncResult.message}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-amber-300 uppercase mb-1">
-                    API Key (apiKey)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customApiKey}
-                    onChange={(e) => setCustomApiKey(e.target.value)}
-                    placeholder="AIzaSy..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono"
-                  />
-                </div>
+                {/* Custom Firebase Credentials Form */}
+                <form onSubmit={handleSaveCustomFirebase} className="space-y-3 pt-1">
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Custom Firebase Project Config:
+                  </p>
 
-                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Auth Domain
+                    <label className="block text-[10px] font-bold text-amber-300 uppercase mb-1">
+                      Firebase Project ID
                     </label>
                     <input
                       type="text"
-                      value={customAuthDomain}
-                      onChange={(e) => setCustomAuthDomain(e.target.value)}
-                      placeholder="project.firebaseapp.com"
+                      required
+                      value={customProjectId}
+                      onChange={(e) => setCustomProjectId(e.target.value)}
+                      placeholder="e.g. little-star-school-batpora"
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Storage Bucket
+                    <label className="block text-[10px] font-bold text-amber-300 uppercase mb-1">
+                      API Key (apiKey)
                     </label>
                     <input
                       type="text"
-                      value={customStorageBucket}
-                      onChange={(e) => setCustomStorageBucket(e.target.value)}
-                      placeholder="project.firebasestorage.app"
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                      required
+                      value={customApiKey}
+                      onChange={(e) => setCustomApiKey(e.target.value)}
+                      placeholder="AIzaSy..."
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono"
                     />
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-2 pt-1">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-lg text-xs"
-                  >
-                    Save & Reconnect
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResetFirebase}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs flex items-center space-x-1"
-                    title="Reset to workspace default"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset</span>
-                  </button>
-                </div>
-              </form>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                        Auth Domain
+                      </label>
+                      <input
+                        type="text"
+                        value={customAuthDomain}
+                        onChange={(e) => setCustomAuthDomain(e.target.value)}
+                        placeholder="project.firebaseapp.com"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                        Storage Bucket
+                      </label>
+                      <input
+                        type="text"
+                        value={customStorageBucket}
+                        onChange={(e) => setCustomStorageBucket(e.target.value)}
+                        placeholder="project.firebasestorage.app"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 pt-1">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-lg text-xs"
+                    >
+                      Save & Reconnect
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetFirebase}
+                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs flex items-center space-x-1"
+                      title="Reset to workspace default"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
         </div>

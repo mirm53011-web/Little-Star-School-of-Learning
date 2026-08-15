@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Award, BookOpen, Target, Compass, Save, Check, Loader2 } from 'lucide-react';
+import { Award, BookOpen, Target, Compass, Save, Check } from 'lucide-react';
 import { SchoolInfo } from '../../types';
 import { updateSchoolInfo } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminAboutPrincipalProps {
   schoolInfo: SchoolInfo;
@@ -192,17 +193,28 @@ export const AdminAboutPrincipal: React.FC<AdminAboutPrincipalProps> = ({ school
           </div>
         </div>
 
-        <div className="flex justify-end">
+        {saving && (
+          <div className="pt-2">
+            <HorizontalProgressBar variant="amber" height="xs" label="Saving profile directly to Firestore..." showStarGlow={false} />
+          </div>
+        )}
+
+        <div className="flex items-center justify-end space-x-3">
+          {success && (
+            <span className="text-xs font-bold text-emerald-600 flex items-center space-x-1">
+              <Check className="w-4 h-4" />
+              <span>Saved to Firestore real-time!</span>
+            </span>
+          )}
           <button
             type="submit"
             disabled={saving}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3.5 rounded-2xl text-sm flex items-center space-x-2 shadow-lg shadow-amber-500/20 cursor-pointer disabled:opacity-50"
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-3.5 rounded-2xl text-sm flex items-center space-x-2 shadow-lg shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
           >
             {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                <span>Saving School Info...</span>
-              </>
+              <ActionButtonProgress label="Saving School Info..." />
+            ) : success ? (
+              <ActionButtonProgress isCompleted completedLabel="Saved ✓" />
             ) : (
               <>
                 <Save className="w-4 h-4" />

@@ -13,8 +13,7 @@ import {
   Calendar,
   AlertCircle,
   Eye,
-  EyeOff,
-  Loader2
+  EyeOff
 } from 'lucide-react';
 import {
   StudentResource,
@@ -25,6 +24,7 @@ import {
 } from '../../types';
 import { saveResource, deleteResource } from '../../lib/schoolDataService';
 import { uploadFileToStorage, formatBytes, getFileTypeFromName } from '../../lib/storageHelper';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminResourcesProps {
   resources: StudentResource[];
@@ -501,6 +501,12 @@ export const AdminResources: React.FC<AdminResourcesProps> = ({ resources }) => 
                 </label>
               </div>
 
+              {saving && (
+                <div className="pt-2">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Saving resource to Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
                 <button
                   type="button"
@@ -512,13 +518,10 @@ export const AdminResources: React.FC<AdminResourcesProps> = ({ resources }) => 
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50 transition-all"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                      <span>Saving Document...</span>
-                    </>
+                    <ActionButtonProgress label="Saving Document..." />
                   ) : (
                     <span>{editingResource ? 'Update Document' : 'Publish Document'}</span>
                   )}

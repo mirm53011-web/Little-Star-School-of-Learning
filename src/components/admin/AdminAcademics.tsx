@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { GraduationCap, Edit2, Plus, Trash2, Check, X, Layers, Loader2, AlertCircle } from 'lucide-react';
+import { GraduationCap, Edit2, Plus, Trash2, Check, X, Layers, AlertCircle } from 'lucide-react';
 import { AcademicLevel } from '../../types';
 import { saveAcademicLevel, deleteAcademicLevel } from '../../lib/schoolDataService';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminAcademicsProps {
   levels: AcademicLevel[];
@@ -216,6 +217,12 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
                 </div>
               )}
 
+              {saving && (
+                <div className="pt-2">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Updating academic level in Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
@@ -228,13 +235,12 @@ export const AdminAcademics: React.FC<AdminAcademicsProps> = ({ levels }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl flex items-center space-x-1.5 disabled:opacity-50"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl flex items-center space-x-1.5 disabled:opacity-50 transition-all"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Updating...</span>
-                    </>
+                    <ActionButtonProgress label="Updating..." />
+                  ) : saveSuccess ? (
+                    <ActionButtonProgress isCompleted completedLabel="Saved ✓" />
                   ) : (
                     <span>Update Wing</span>
                   )}

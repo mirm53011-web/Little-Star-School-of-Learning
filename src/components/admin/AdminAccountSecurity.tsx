@@ -6,13 +6,13 @@ import {
   Lock,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   Eye,
   EyeOff,
   UserCheck,
   RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 export const AdminAccountSecurity: React.FC = () => {
   const { user, changePassword, changeEmail, authError, clearAuthError } = useAuth();
@@ -232,6 +232,12 @@ export const AdminAccountSecurity: React.FC = () => {
                 </div>
               </div>
 
+              {emailLoading && (
+                <div className="pt-1">
+                  <HorizontalProgressBar variant="slate" height="xs" label="Updating email with Firebase Auth..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-2">
                 <button
                   id="submit-change-email-btn"
@@ -240,10 +246,7 @@ export const AdminAccountSecurity: React.FC = () => {
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 cursor-pointer shadow"
                 >
                   {emailLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Re-authenticating & Updating Email...</span>
-                    </>
+                    <span className="text-amber-400 font-bold">Re-authenticating & Updating Email...</span>
                   ) : (
                     <>
                       <RefreshCw className="w-4 h-4 text-amber-400" />
@@ -371,6 +374,12 @@ export const AdminAccountSecurity: React.FC = () => {
                 </div>
               </div>
 
+              {passLoading && (
+                <div className="pt-1">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Updating master password in Firebase Auth..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-2">
                 <button
                   id="submit-change-password-btn"
@@ -379,10 +388,7 @@ export const AdminAccountSecurity: React.FC = () => {
                   className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 cursor-pointer shadow"
                 >
                   {passLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                      <span>Re-authenticating & Updating Password...</span>
-                    </>
+                    <ActionButtonProgress label="Updating Password..." />
                   ) : (
                     <>
                       <KeyRound className="w-4 h-4 text-slate-950" />

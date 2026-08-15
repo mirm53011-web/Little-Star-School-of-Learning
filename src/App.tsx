@@ -53,7 +53,8 @@ import { ContactSection } from './components/public/ContactSection';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { Shield, Sparkles, Phone, MapPin, Star, AlertCircle, Loader2 } from 'lucide-react';
+import { FullPageLoader } from './components/common/HorizontalProgressBar';
+import { Shield, Sparkles, Phone, MapPin, Star, AlertCircle } from 'lucide-react';
 
 const SchoolApp: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -224,10 +225,10 @@ const SchoolApp: React.FC = () => {
   if (currentView === 'admin') {
     if (authLoading) {
       return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
-          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-          <p className="text-sm font-semibold text-slate-300">Checking Little Star Admin Credentials...</p>
-        </div>
+        <FullPageLoader
+          message="Checking Little Star Admin Credentials..."
+          subMessage="Authenticating session with Firebase Auth"
+        />
       );
     }
 

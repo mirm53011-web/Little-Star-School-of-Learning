@@ -9,11 +9,11 @@ import {
   AlertCircle,
   Sparkles,
   School,
-  Award,
-  Loader2
+  Award
 } from 'lucide-react';
 import { SchoolInfo, ALL_CLASSES } from '../../types';
 import { submitEnquiry } from '../../lib/schoolDataService';
+import { HorizontalProgressBar } from '../common/HorizontalProgressBar';
 
 interface ContactSectionProps {
   schoolInfo: SchoolInfo;
@@ -350,6 +350,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ schoolInfo }) =>
                     />
                   </div>
 
+                  {loading && (
+                    <div className="pt-1">
+                      <HorizontalProgressBar variant="amber" height="xs" label="Submitting Enquiry..." showStarGlow={false} />
+                    </div>
+                  )}
+
                   <button
                     id="submit-enquiry-btn"
                     type="submit"
@@ -357,10 +363,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ schoolInfo }) =>
                     className="w-full bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold py-3.5 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-lg shadow-slate-900/20 transition-all cursor-pointer disabled:opacity-50"
                   >
                     {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                        <span>Submitting Enquiry...</span>
-                      </>
+                      <span>Sending Details to Admissions Office...</span>
                     ) : (
                       <>
                         <Send className="w-4 h-4 text-amber-400" />

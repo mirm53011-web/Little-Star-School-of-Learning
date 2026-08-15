@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, Trash2, Edit2, Clock, MapPin, X, Loader2, AlertCircle } from 'lucide-react';
+import { Calendar, Plus, Trash2, Edit2, Clock, MapPin, X, AlertCircle } from 'lucide-react';
 import { SchoolEvent } from '../../types';
 import { saveEvent, deleteEvent } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminEventsProps {
   events: SchoolEvent[];
@@ -284,6 +285,12 @@ export const AdminEvents: React.FC<AdminEventsProps> = ({ events }) => {
                 </div>
               )}
 
+              {saving && (
+                <div className="pt-2">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Saving event to Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
@@ -296,13 +303,10 @@ export const AdminEvents: React.FC<AdminEventsProps> = ({ events }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5 transition-all"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving...</span>
-                    </>
+                    <ActionButtonProgress label="Saving..." />
                   ) : (
                     <span>Save Event</span>
                   )}

@@ -10,12 +10,12 @@ import {
   X,
   Eye,
   EyeOff,
-  Download,
-  Loader2
+  Download
 } from 'lucide-react';
 import { NoticeItem } from '../../types';
 import { saveNotice, deleteNotice } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminNoticesProps {
   notices: NoticeItem[];
@@ -319,6 +319,12 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
                 </div>
               )}
 
+              {saving && (
+                <div className="pt-2">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Saving circular to Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"
@@ -331,13 +337,10 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2 text-xs rounded-xl cursor-pointer disabled:opacity-50 flex items-center space-x-1.5 transition-all"
                 >
                   {saving ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving...</span>
-                    </>
+                    <ActionButtonProgress label="Saving..." />
                   ) : (
                     <span>Save Circular</span>
                   )}

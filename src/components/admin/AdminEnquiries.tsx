@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { EnquirySubmission } from '../../types';
 import { updateEnquiryStatus, deleteEnquiry } from '../../lib/schoolDataService';
+import { HorizontalProgressBar, ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminEnquiriesProps {
   enquiries: EnquirySubmission[];
@@ -367,6 +368,12 @@ export const AdminEnquiries: React.FC<AdminEnquiriesProps> = ({ enquiries }) => 
                 />
               </div>
 
+              {isUpdating && (
+                <div className="pt-1">
+                  <HorizontalProgressBar variant="amber" height="xs" label="Updating enquiry status in Firestore..." showStarGlow={false} />
+                </div>
+              )}
+
               <div className="flex items-center space-x-3 pt-2">
                 <button
                   id="save-enquiry-status-btn"
@@ -374,8 +381,16 @@ export const AdminEnquiries: React.FC<AdminEnquiriesProps> = ({ enquiries }) => 
                   disabled={isUpdating}
                   className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{isUpdating ? 'Saving...' : 'Save Follow-up & Notes'}</span>
+                  {isUpdating ? (
+                    <ActionButtonProgress label="Saving..." className="text-white" />
+                  ) : saveSuccess ? (
+                    <ActionButtonProgress isCompleted completedLabel="Saved ✓" className="text-white" />
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Save Follow-up & Notes</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => handleDelete(selectedEnquiry.id)}

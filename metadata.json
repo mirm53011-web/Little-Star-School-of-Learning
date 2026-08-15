@@ -1,0 +1,6 @@
+{
+  "name": "Little Star School of Learning",
+  "description": "Official modern website and CMS for Little Star School of Learning in Batpora, Jammu & Kashmir, India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

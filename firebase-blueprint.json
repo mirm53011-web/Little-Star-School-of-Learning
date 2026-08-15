@@ -1,0 +1,203 @@
+{
+  "entities": {
+    "SchoolInfo": {
+      "title": "School Information",
+      "description": "General profile and contact details for the school",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "addressDetails": { "type": "string" },
+        "phone": { "type": "string" },
+        "altPhone": { "type": "string" },
+        "email": { "type": "string" },
+        "workingHours": { "type": "string" },
+        "affiliation": { "type": "string" },
+        "motto": { "type": "string" },
+        "establishedYear": { "type": "string" },
+        "mapEmbedQuery": { "type": "string" },
+        "aboutStory": { "type": "string" },
+        "vision": { "type": "string" },
+        "mission": { "type": "string" },
+        "coreValues": { "type": "array" },
+        "principalName": { "type": "string" },
+        "principalTitle": { "type": "string" },
+        "principalMessage": { "type": "string" },
+        "principalPhotoUrl": { "type": "string" }
+      },
+      "required": ["name", "location", "phone", "email"]
+    },
+    "EnquirySubmission": {
+      "title": "Enquiry Submission",
+      "description": "Parent and admission enquiry submission",
+      "type": "object",
+      "properties": {
+        "parentName": { "type": "string" },
+        "studentName": { "type": "string" },
+        "classGrade": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "Contacted", "In Review", "Resolved"] },
+        "staffNotes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["parentName", "studentName", "classGrade", "phone", "status"]
+    },
+    "NoticeItem": {
+      "title": "Notice Item",
+      "description": "Official school notice or circular",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "publishDate": { "type": "string" },
+        "content": { "type": "string" },
+        "isPinned": { "type": "boolean" },
+        "attachmentUrl": { "type": "string" },
+        "attachmentName": { "type": "string" },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["title", "category", "publishDate", "content"]
+    },
+    "StudentResource": {
+      "title": "Student Resource",
+      "description": "Academic study materials, syllabus, date sheets, assignments",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "targetClass": { "type": "string" },
+        "subject": { "type": "string" },
+        "fileType": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "publishDate": { "type": "string" },
+        "description": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "downloadCount": { "type": "number" }
+      },
+      "required": ["title", "category", "targetClass", "downloadUrl"]
+    },
+    "HeroSlide": {
+      "title": "Hero Slide",
+      "description": "Carousel slide on the homepage",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "badgeText": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "ctaLink": { "type": "string" },
+        "bgGradient": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "order": { "type": "number" },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["title", "subtitle"]
+    },
+    "AcademicLevel": {
+      "title": "Academic Level",
+      "description": "Educational tier (Kindergarten, Primary, Middle, Secondary, Senior Secondary)",
+      "type": "object",
+      "properties": {
+        "levelName": { "type": "string" },
+        "grades": { "type": "string" },
+        "ageGroup": { "type": "string" },
+        "tagline": { "type": "string" },
+        "description": { "type": "string" },
+        "subjects": { "type": "array" },
+        "highlights": { "type": "array" },
+        "order": { "type": "number" }
+      },
+      "required": ["levelName", "grades", "description"]
+    },
+    "SchoolEvent": {
+      "title": "School Event",
+      "description": "Campus events, competitions, annual sports",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "registrationUrl": { "type": "string" },
+        "isUpcoming": { "type": "boolean" },
+        "order": { "type": "number" },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["title", "date", "description"]
+    },
+    "GalleryItem": {
+      "title": "Gallery Item",
+      "description": "Campus photo gallery albums",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "caption": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "date": { "type": "string" },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["title", "category", "imageUrl"]
+    },
+    "AdmissionInfo": {
+      "title": "Admission Info",
+      "description": "Admission overview, guidelines, eligibility, fees and steps",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "academicSession": { "type": "string" },
+        "overview": { "type": "string" },
+        "eligibility": { "type": "array" },
+        "procedureSteps": { "type": "array" },
+        "requiredDocuments": { "type": "array" },
+        "importantDates": { "type": "array" },
+        "contactHelpline": { "type": "string" }
+      },
+      "required": ["status", "academicSession"]
+    }
+  },
+  "firestore": {
+    "/school_info/{docId}": {
+      "schema": { "$ref": "#/entities/SchoolInfo" },
+      "description": "Public school profile, about and principal message."
+    },
+    "/hero_slides/{docId}": {
+      "schema": { "$ref": "#/entities/HeroSlide" },
+      "description": "Homepage hero banners and carousel slides."
+    },
+    "/notices/{docId}": {
+      "schema": { "$ref": "#/entities/NoticeItem" },
+      "description": "School notices, circulars, and announcements."
+    },
+    "/resources/{docId}": {
+      "schema": { "$ref": "#/entities/StudentResource" },
+      "description": "Student resources, syllabus, past papers, date sheets."
+    },
+    "/events/{docId}": {
+      "schema": { "$ref": "#/entities/SchoolEvent" },
+      "description": "School calendar, sports, annual functions."
+    },
+    "/gallery/{docId}": {
+      "schema": { "$ref": "#/entities/GalleryItem" },
+      "description": "Campus photo gallery albums."
+    },
+    "/academics/{docId}": {
+      "schema": { "$ref": "#/entities/AcademicLevel" },
+      "description": "Curriculum details for each academic tier."
+    },
+    "/admissions/{docId}": {
+      "schema": { "$ref": "#/entities/AdmissionInfo" },
+      "description": "Admission guidelines, timeline and required documents."
+    },
+    "/enquiries/{enquiryId}": {
+      "schema": { "$ref": "#/entities/EnquirySubmission" },
+      "description": "Admission enquiries submitted by parents."
+    }
+  }
+}

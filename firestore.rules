@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function for admin authentication
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Public read for school information, write restricted to authenticated administrators
+    match /school_info/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // Public read for homepage hero carousel slides
+    match /hero_slides/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Public read for official circulars and notices
+    match /notices/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Public read for syllabus, date sheets, study materials & academic resources
+    // Download counter can be incremented publicly; creation, deletion and full edits restricted to admin
+    match /resources/{docId} {
+      allow read: if true;
+      allow update: if isAuthenticated() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount']));
+      allow create, delete: if isAuthenticated();
+    }
+
+    // School events and calendar functions
+    match /events/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // School photo gallery
+    match /gallery/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Academic grade levels and curriculum info
+    match /academics/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Admissions criteria, procedures and document lists
+    match /admissions/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Testimonials and parent reviews
+    match /testimonials/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Public enquiry submission form
+    // Any prospective parent can submit an enquiry; only authenticated admin can read or manage
+    match /enquiries/{enquiryId} {
+      allow create: if true;
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // Admin user profiles and metadata
+    match /admin_users/{userId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

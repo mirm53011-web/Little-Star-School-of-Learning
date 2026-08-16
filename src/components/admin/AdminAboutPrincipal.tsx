@@ -22,6 +22,19 @@ export const AdminAboutPrincipal: React.FC<AdminAboutPrincipalProps> = ({ school
   const [success, setSuccess] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
+  // Sync state if schoolInfo changes from live Firestore snapshot
+  React.useEffect(() => {
+    if (!saving) {
+      setPrincipalName(schoolInfo.principalName);
+      setPrincipalMessage(schoolInfo.principalMessage);
+      setPrincipalPhotoUrl(schoolInfo.principalPhotoUrl || '');
+      setAboutText(schoolInfo.aboutText);
+      setPhilosophy(schoolInfo.philosophy);
+      setVision(schoolInfo.vision);
+      setMission(schoolInfo.mission);
+    }
+  }, [schoolInfo, saving]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -192,12 +205,6 @@ export const AdminAboutPrincipal: React.FC<AdminAboutPrincipalProps> = ({ school
             </div>
           </div>
         </div>
-
-        {saving && (
-          <div className="pt-2">
-            <HorizontalProgressBar variant="amber" height="xs" label="Saving profile directly to Firestore..." showStarGlow={false} />
-          </div>
-        )}
 
         <div className="flex items-center justify-end space-x-3">
           {success && (

@@ -319,12 +319,6 @@ export const AdminNotices: React.FC<AdminNoticesProps> = ({ notices }) => {
                 </div>
               )}
 
-              {saving && (
-                <div className="pt-2">
-                  <HorizontalProgressBar variant="amber" height="xs" label="Saving circular to Firestore..." showStarGlow={false} />
-                </div>
-              )}
-
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"

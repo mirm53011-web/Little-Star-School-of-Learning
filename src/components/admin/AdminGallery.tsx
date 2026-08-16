@@ -252,12 +252,6 @@ export const AdminGallery: React.FC<AdminGalleryProps> = ({ gallery }) => {
                 </div>
               )}
 
-              {saving && (
-                <div className="pt-2">
-                  <HorizontalProgressBar variant="amber" height="xs" label="Saving photo metadata to Firestore..." showStarGlow={false} />
-                </div>
-              )}
-
               <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
                 <button
                   type="button"

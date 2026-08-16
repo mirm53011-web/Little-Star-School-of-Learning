@@ -34,34 +34,44 @@ import {
   subscribeEnquiries
 } from './lib/schoolDataService';
 
-// Public Layout & Sections
+// Public Layout
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { ScrollProgressIndicator } from './components/layout/ScrollProgressIndicator';
-import { HeroCarousel } from './components/public/HeroCarousel';
-import { AboutSection } from './components/public/AboutSection';
-import { PrincipalMessageSection } from './components/public/PrincipalMessageSection';
-import { AcademicsSection } from './components/public/AcademicsSection';
-import { AdmissionsSection } from './components/public/AdmissionsSection';
-import { StudentResourcesSection } from './components/public/StudentResourcesSection';
-import { NoticeBoardSection } from './components/public/NoticeBoardSection';
-import { EventsSection } from './components/public/EventsSection';
-import { GallerySection } from './components/public/GallerySection';
-import { ContactSection } from './components/public/ContactSection';
+
+// Dedicated Page Components
+import { HomePage } from './components/pages/HomePage';
+import { AboutPage } from './components/pages/AboutPage';
+import { AcademicsPage } from './components/pages/AcademicsPage';
+import { AdmissionsPage } from './components/pages/AdmissionsPage';
+import { StudentResourcesPage } from './components/pages/StudentResourcesPage';
+import { NoticesPage } from './components/pages/NoticesPage';
+import { EventsPage } from './components/pages/EventsPage';
+import { GalleryPage } from './components/pages/GalleryPage';
+import { ContactPage } from './components/pages/ContactPage';
 
 // Admin Components
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { FullPageLoader } from './components/common/HorizontalProgressBar';
-import { Shield, Sparkles, Phone, MapPin, Star, AlertCircle } from 'lucide-react';
+
+export type AppPage =
+  | 'home'
+  | 'about'
+  | 'academics'
+  | 'admissions'
+  | 'resources'
+  | 'notices'
+  | 'events'
+  | 'gallery'
+  | 'contact';
 
 const SchoolApp: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
   // Application view: 'public' | 'admin'
   const [currentView, setCurrentView] = useState<'public' | 'admin'>('public');
-  const [activeSection, setActiveSection] = useState<string>('home');
+  const [activePage, setActivePage] = useState<AppPage>('home');
 
   // Realtime School Data State
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>(DEFAULT_SCHOOL_INFO);
@@ -73,7 +83,6 @@ const SchoolApp: React.FC = () => {
   const [events, setEvents] = useState<SchoolEvent[]>(DEFAULT_EVENTS);
   const [gallery, setGallery] = useState<GalleryItem[]>(DEFAULT_GALLERY);
   const [enquiries, setEnquiries] = useState<EnquirySubmission[]>([]);
-  const [dataReady, setDataReady] = useState<boolean>(false);
 
   // Initialize public Firestore listeners & routing
   useEffect(() => {
@@ -87,25 +96,37 @@ const SchoolApp: React.FC = () => {
     const unsubEvents = subscribeEvents((data) => setEvents(data));
     const unsubGallery = subscribeGallery((data) => setGallery(data));
 
-    setDataReady(true);
-
-    // Handle pathname and hash routing for /admin and /admin/login
+    // Handle pathname and hash routing for pages and admin
     const handleRouting = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
 
       if (path.startsWith('/admin') || hash === '#admin' || hash === '#/admin' || hash.startsWith('#admin/')) {
         setCurrentView('admin');
-      } else {
-        setCurrentView('public');
-        if (hash && hash !== '#' && !hash.startsWith('#admin')) {
-          const id = hash.replace('#', '');
-          const elem = document.getElementById(id);
-          if (elem) {
-            elem.scrollIntoView({ behavior: 'smooth' });
-            setActiveSection(id);
-          }
-        }
+        return;
+      }
+
+      setCurrentView('public');
+
+      const cleanHash = hash.replace(/^#\/?/, '');
+      const validPages: AppPage[] = [
+        'home',
+        'about',
+        'academics',
+        'admissions',
+        'resources',
+        'notices',
+        'events',
+        'gallery',
+        'contact'
+      ];
+
+      if (validPages.includes(cleanHash as AppPage)) {
+        setActivePage(cleanHash as AppPage);
+      } else if (cleanHash === 'principal-message') {
+        setActivePage('about');
+      } else if (!cleanHash || cleanHash === '') {
+        setActivePage('home');
       }
     };
 
@@ -140,83 +161,50 @@ const SchoolApp: React.FC = () => {
     }
   }, [user]);
 
-  // Dynamic Scroll Spy for active section highlighting
-  useEffect(() => {
-    if (currentView !== 'public') return;
+  // Navigate to dedicated page
+  const navigateToPage = (pageId: string) => {
+    let targetPage: AppPage = 'home';
+    if (pageId === 'principal-message' || pageId === 'about') {
+      targetPage = 'about';
+    } else if (pageId === 'academics') {
+      targetPage = 'academics';
+    } else if (pageId === 'admissions') {
+      targetPage = 'admissions';
+    } else if (pageId === 'resources' || pageId === 'students') {
+      targetPage = 'resources';
+    } else if (pageId === 'notices') {
+      targetPage = 'notices';
+    } else if (pageId === 'events') {
+      targetPage = 'events';
+    } else if (pageId === 'gallery') {
+      targetPage = 'gallery';
+    } else if (pageId === 'contact') {
+      targetPage = 'contact';
+    } else if (pageId === 'admin') {
+      setCurrentView('admin');
+      window.location.hash = '#/admin';
+      return;
+    } else {
+      targetPage = 'home';
+    }
 
-    const sectionIds = [
-      'home',
-      'about',
-      'principal-message',
-      'academics',
-      'admissions',
-      'resources',
-      'notices',
-      'events',
-      'gallery',
-      'contact'
-    ];
-
-    let isScrolling = false;
-
-    const handleScrollSpy = () => {
-      const scrollPosition = window.scrollY + 140;
-
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
-        if (el) {
-          const top = el.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSection(sectionIds[i]);
-            break;
-          }
-        }
-      }
-      isScrolling = false;
-    };
-
-    const onScroll = () => {
-      if (!isScrolling) {
-        window.requestAnimationFrame(handleScrollSpy);
-        isScrolling = true;
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    handleScrollSpy();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [currentView]);
-
-  // Smooth Section Navigation
-  const scrollToSection = (sectionId: string) => {
     if (currentView === 'admin') {
       setCurrentView('public');
-      setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-          setActiveSection(sectionId);
-        }
-      }, 100);
-    } else {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-        setActiveSection(sectionId);
-      }
     }
+
+    setActivePage(targetPage);
+    window.location.hash = `#/${targetPage}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Return to Public Site
+  // Return to Public Site from Admin
   const handleBackToWebsite = () => {
     setCurrentView('public');
+    setActivePage('home');
     if (window.location.pathname.startsWith('/admin')) {
       window.history.pushState({}, '', '/');
     } else {
-      window.location.hash = '';
+      window.location.hash = '#/home';
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -258,105 +246,115 @@ const SchoolApp: React.FC = () => {
     );
   }
 
-  // Public School Website
+  // Public School Website with Dedicated Pages
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-amber-400 selection:text-slate-950 font-sans overflow-x-hidden w-full">
-      {/* Top of Screen Subtle Scroll Progress Indicator */}
-      <ScrollProgressIndicator activeSection={activeSection} onNavigate={scrollToSection} />
-
-      {/* Main Header / Navigation with sticky positioning and responsive layout */}
+      {/* Main Header / Navigation */}
       <ErrorBoundary name="Navigation Header" variant="card">
         <Navbar
           schoolInfo={schoolInfo}
-          activeSection={activeSection}
-          onNavigate={scrollToSection}
+          activeSection={activePage}
+          onNavigate={navigateToPage}
         />
       </ErrorBoundary>
 
-      {/* Public Page Content */}
+      {/* Dedicated Page View Content */}
       <main className="flex-1 overflow-x-hidden w-full">
-        {/* Section 1: Hero Carousel */}
-        <ErrorBoundary name="Hero Banner" variant="section">
-          <HeroCarousel
-            slides={heroSlides}
-            onNavigate={scrollToSection}
-          />
-        </ErrorBoundary>
+        {activePage === 'home' && (
+          <ErrorBoundary name="Home Page" variant="section">
+            <HomePage
+              schoolInfo={schoolInfo}
+              heroSlides={heroSlides}
+              academics={academics}
+              admissions={admissions}
+              resources={resources}
+              notices={notices}
+              events={events}
+              gallery={gallery}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 2: About School */}
-        <ErrorBoundary name="About Section" variant="section">
-          <AboutSection
-            schoolInfo={schoolInfo}
-            onNavigate={scrollToSection}
-          />
-        </ErrorBoundary>
+        {activePage === 'about' && (
+          <ErrorBoundary name="About Page" variant="section">
+            <AboutPage
+              schoolInfo={schoolInfo}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 3: Principal's Message */}
-        <ErrorBoundary name="Principal's Message" variant="section">
-          <PrincipalMessageSection
-            schoolInfo={schoolInfo}
-            onNavigate={scrollToSection}
-          />
-        </ErrorBoundary>
+        {activePage === 'academics' && (
+          <ErrorBoundary name="Academics Page" variant="section">
+            <AcademicsPage
+              levels={academics}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 4: Academic Curriculum */}
-        <ErrorBoundary name="Academic Wings" variant="section">
-          <AcademicsSection
-            levels={academics}
-            onNavigate={scrollToSection}
-          />
-        </ErrorBoundary>
+        {activePage === 'admissions' && (
+          <ErrorBoundary name="Admissions Page" variant="section">
+            <AdmissionsPage
+              admissionsInfo={admissions}
+              schoolInfo={schoolInfo}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 5: Admissions Guide */}
-        <ErrorBoundary name="Admissions Portal" variant="section">
-          <AdmissionsSection
-            admissionsInfo={admissions}
-            schoolInfo={schoolInfo}
-            onNavigate={scrollToSection}
-          />
-        </ErrorBoundary>
+        {activePage === 'resources' && (
+          <ErrorBoundary name="Student Resources Page" variant="section">
+            <StudentResourcesPage
+              resources={resources}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 6: Student Resource & Downloads Portal */}
-        <ErrorBoundary name="Student Resources" variant="section">
-          <StudentResourcesSection
-            resources={resources}
-          />
-        </ErrorBoundary>
+        {activePage === 'notices' && (
+          <ErrorBoundary name="Notices Page" variant="section">
+            <NoticesPage
+              notices={notices}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 7: Notice Board & Circulars */}
-        <ErrorBoundary name="Notice Board" variant="section">
-          <NoticeBoardSection
-            notices={notices}
-          />
-        </ErrorBoundary>
+        {activePage === 'events' && (
+          <ErrorBoundary name="Events Page" variant="section">
+            <EventsPage
+              events={events}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 8: Campus Events & Calendar */}
-        <ErrorBoundary name="Events & Calendar" variant="section">
-          <EventsSection
-            events={events}
-          />
-        </ErrorBoundary>
+        {activePage === 'gallery' && (
+          <ErrorBoundary name="Gallery Page" variant="section">
+            <GalleryPage
+              galleryItems={gallery}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
 
-        {/* Section 9: Photo Gallery */}
-        <ErrorBoundary name="Photo Gallery" variant="section">
-          <GallerySection
-            gallery={gallery}
-          />
-        </ErrorBoundary>
-
-        {/* Section 10: Contact & Admission Enquiry */}
-        <ErrorBoundary name="Contact & Enquiry" variant="section">
-          <ContactSection
-            schoolInfo={schoolInfo}
-          />
-        </ErrorBoundary>
+        {activePage === 'contact' && (
+          <ErrorBoundary name="Contact Page" variant="section">
+            <ContactPage
+              schoolInfo={schoolInfo}
+              onNavigate={navigateToPage}
+            />
+          </ErrorBoundary>
+        )}
       </main>
 
-      {/* Footer */}
+      {/* Main Footer */}
       <ErrorBoundary name="Footer" variant="card">
         <Footer
           schoolInfo={schoolInfo}
-          onNavigate={scrollToSection}
+          onNavigate={navigateToPage}
         />
       </ErrorBoundary>
     </div>

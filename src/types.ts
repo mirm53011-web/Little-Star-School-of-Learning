@@ -70,6 +70,16 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
   'Other Important Documents'
 ];
 
+export const GALLERY_CATEGORIES = [
+  'Campus',
+  'Classroom',
+  'Sports',
+  'Cultural Activities',
+  'School Events',
+  'Annual Functions',
+  'Other'
+] as const;
+
 export interface HeroSlide {
   id: string;
   badge: string;

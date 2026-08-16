@@ -47,7 +47,9 @@ export const Footer: React.FC<FooterProps> = ({ schoolInfo, onNavigate }) => {
                 { id: 'admissions', label: 'Admissions 2026–27' },
                 { id: 'resources', label: 'Student Downloads & Syllabi' },
                 { id: 'notices', label: 'Official Notice Board' },
+                { id: 'events', label: 'Events & Calendar' },
                 { id: 'gallery', label: 'School Photo Gallery' },
+                { id: 'contact', label: 'Contact & Campus Visit' },
               ].map((item) => (
                 <li key={item.id}>
                   <button

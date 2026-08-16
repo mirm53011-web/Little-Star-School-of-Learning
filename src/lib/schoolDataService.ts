@@ -79,8 +79,8 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.warn('Firestore Operation Notice: ', JSON.stringify(errInfo));
-  return errInfo;
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
 }
 
 // Helper to seed initial data if Firestore is fresh
@@ -314,7 +314,11 @@ export function subscribeSchoolInfo(callback: (info: SchoolInfo) => void) {
       callback(DEFAULT_SCHOOL_INFO);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.GET, 'school_info/main');
+    try {
+      handleFirestoreError(err, OperationType.GET, 'school_info/main');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_SCHOOL_INFO);
   });
 }
@@ -329,7 +333,11 @@ export function subscribeAdmissions(callback: (info: AdmissionInfo) => void) {
       callback(DEFAULT_ADMISSIONS);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.GET, 'admissions/main');
+    try {
+      handleFirestoreError(err, OperationType.GET, 'admissions/main');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_ADMISSIONS);
   });
 }
@@ -346,7 +354,11 @@ export function subscribeHeroSlides(callback: (slides: HeroSlide[]) => void) {
       callback(DEFAULT_HERO_SLIDES);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'hero_slides');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'hero_slides');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_HERO_SLIDES);
   });
 }
@@ -363,7 +375,11 @@ export function subscribeAcademics(callback: (levels: AcademicLevel[]) => void) 
       callback(DEFAULT_ACADEMIC_LEVELS);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'academics');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'academics');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_ACADEMIC_LEVELS);
   });
 }
@@ -384,7 +400,11 @@ export function subscribeNotices(callback: (notices: NoticeItem[]) => void) {
       callback(DEFAULT_NOTICES);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'notices');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'notices');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_NOTICES);
   });
 }
@@ -401,7 +421,11 @@ export function subscribeResources(callback: (resources: StudentResource[]) => v
       callback(DEFAULT_RESOURCES);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'resources');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'resources');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_RESOURCES);
   });
 }
@@ -418,7 +442,11 @@ export function subscribeEvents(callback: (events: SchoolEvent[]) => void) {
       callback(DEFAULT_EVENTS);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'events');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'events');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_EVENTS);
   });
 }
@@ -435,7 +463,11 @@ export function subscribeGallery(callback: (items: GalleryItem[]) => void) {
       callback(DEFAULT_GALLERY);
     }
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'gallery');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'gallery');
+    } catch {
+      // Structured error logged
+    }
     callback(DEFAULT_GALLERY);
   });
 }
@@ -454,7 +486,11 @@ export function subscribeEnquiries(callback: (items: EnquirySubmission[]) => voi
     items.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     callback(items);
   }, (err) => {
-    handleFirestoreError(err, OperationType.LIST, 'enquiries');
+    try {
+      handleFirestoreError(err, OperationType.LIST, 'enquiries');
+    } catch {
+      // Structured error logged
+    }
     callback([]);
   });
 }

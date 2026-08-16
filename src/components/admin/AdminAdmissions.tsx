@@ -25,6 +25,19 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync state if admissionsInfo changes from live Firestore snapshot
+  React.useEffect(() => {
+    if (!saving) {
+      setAcademicSession(admissionsInfo.academicSession);
+      setStatus(admissionsInfo.status);
+      setAnnouncement(admissionsInfo.announcement);
+      setContactNote(admissionsInfo.contactNote);
+      setEligibilityText(admissionsInfo.eligibilityCriteria.join('\n'));
+      setDocumentsText(admissionsInfo.requiredDocuments.join('\n'));
+      setImportantDates(admissionsInfo.importantDates || []);
+    }
+  }, [admissionsInfo, saving]);
+
   const handleAddDate = () => {
     setImportantDates([...importantDates, { event: 'New Milestone', date: 'Date / Period' }]);
   };
@@ -218,12 +231,6 @@ export const AdminAdmissions: React.FC<AdminAdmissionsProps> = ({ admissionsInfo
           <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMessage}</span>
-          </div>
-        )}
-
-        {saving && (
-          <div className="pt-2">
-            <HorizontalProgressBar variant="amber" height="xs" label="Saving admissions configuration to Firestore..." showStarGlow={false} />
           </div>
         )}
 

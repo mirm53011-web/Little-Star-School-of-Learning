@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Sparkles, Plus, Trash2, Edit2, Check, X, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Plus, Trash2, Edit2, Check, X, Eye, EyeOff, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { HeroSlide } from '../../types';
 import { saveHeroSlide, deleteHeroSlide } from '../../lib/schoolDataService';
 import { uploadFileToStorage } from '../../lib/storageHelper';
-import { HorizontalProgressBar } from '../common/HorizontalProgressBar';
+import { ActionButtonProgress } from '../common/HorizontalProgressBar';
 
 interface AdminHeroSlidesProps {
   slides: HeroSlide[];
@@ -24,6 +24,7 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const openCreate = () => {
     setEditingSlide(null);
@@ -36,6 +37,7 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
     setEnabled(true);
     setOrder(slides.length + 1);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
@@ -50,12 +52,14 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
     setEnabled(slide.enabled);
     setOrder(slide.order || 1);
     setSelectedFile(null);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMessage(null);
     try {
       let finalImg = bgImage;
       if (selectedFile) {
@@ -75,8 +79,9 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
         order: Number(order)
       });
       setIsModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save slide:', err);
+      setErrorMessage(err?.message || 'Failed to save slide to Firestore.');
     } finally {
       setSaving(false);
     }
@@ -277,9 +282,10 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
                 />
               </div>
 
-              {saving && (
-                <div className="pt-2">
-                  <HorizontalProgressBar variant="amber" height="xs" label="Saving slide to Firestore..." showStarGlow={false} />
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
 
@@ -294,10 +300,10 @@ export const AdminHeroSlides: React.FC<AdminHeroSlidesProps> = ({ slides }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 shadow cursor-pointer disabled:opacity-50 transition-all"
                 >
                   {saving ? (
-                    <span>Saving...</span>
+                    <ActionButtonProgress label="Saving Slide..." />
                   ) : (
                     <span>Save Slide</span>
                   )}

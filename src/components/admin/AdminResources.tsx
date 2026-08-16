@@ -501,12 +501,6 @@ export const AdminResources: React.FC<AdminResourcesProps> = ({ resources }) => 
                 </label>
               </div>
 
-              {saving && (
-                <div className="pt-2">
-                  <HorizontalProgressBar variant="amber" height="xs" label="Saving resource to Firestore..." showStarGlow={false} />
-                </div>
-              )}
-
               <div className="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
                 <button
                   type="button"

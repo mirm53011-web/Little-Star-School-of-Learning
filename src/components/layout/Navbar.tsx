@@ -36,14 +36,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const navLinks = [
-    { id: 'home', label: 'HOME' },
-    { id: 'about', label: 'ABOUT' },
-    { id: 'academics', label: 'ACADEMICS' },
-    { id: 'admissions', label: 'ADMISSIONS' },
-    { id: 'resources', label: 'STUDENTS' },
-    { id: 'gallery', label: 'GALLERY' },
-    { id: 'notices', label: 'NOTICE BOARD' },
-    { id: 'contact', label: 'CONTACT' },
+    { id: 'home', label: 'Home' },
+    { id: 'about', label: 'About' },
+    { id: 'academics', label: 'Academics' },
+    { id: 'admissions', label: 'Admissions' },
+    { id: 'resources', label: 'Student Resources' },
+    { id: 'notices', label: 'Notices' },
+    { id: 'events', label: 'Events' },
+    { id: 'gallery', label: 'Gallery' },
+    { id: 'contact', label: 'Contact' },
   ];
 
   const handleNavClick = (id: string) => {

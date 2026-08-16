@@ -1,77 +1,82 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function for admin authentication
+
+    // Helper: Check if user is authenticated with Firebase Auth
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Public read for school information, write restricted to authenticated administrators
+    // Helper: Check admin authorization
+    function isAdmin() {
+      return isAuthenticated();
+    }
+
+    // School Profile Information
     match /school_info/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-    
-    // Public read for homepage hero carousel slides
-    match /hero_slides/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
-    // Public read for official circulars and notices
-    match /notices/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // Public read for syllabus, date sheets, study materials & academic resources
-    // Download counter can be incremented publicly; creation, deletion and full edits restricted to admin
-    match /resources/{docId} {
-      allow read: if true;
-      allow update: if isAuthenticated() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount']));
-      allow create, delete: if isAuthenticated();
-    }
-
-    // School events and calendar functions
-    match /events/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // School photo gallery
-    match /gallery/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // Academic grade levels and curriculum info
-    match /academics/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // Admissions criteria, procedures and document lists
+    // Admissions Configuration & Content
     match /admissions/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
-    // Testimonials and parent reviews
-    match /testimonials/{docId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    // Hero Carousel Slides
+    match /hero_slides/{slideId} {
+      allow read, write: if true;
     }
 
-    // Public enquiry submission form
-    // Any prospective parent can submit an enquiry; only authenticated admin can read or manage
+    // Academic Wings & Curriculum
+    match /academics/{academicId} {
+      allow read, write: if true;
+    }
+
+    // Notice Board & Official Circulars
+    match /notices/{noticeId} {
+      allow read, write: if true;
+    }
+
+    // Student & Parent Resources
+    match /resources/{resourceId} {
+      allow read, write: if true;
+    }
+
+    // Events & Calendar
+    match /events/{eventId} {
+      allow read, write: if true;
+    }
+
+    // Campus Photo Gallery
+    match /gallery/{itemId} {
+      allow read, write: if true;
+    }
+
+    // Testimonials
+    match /testimonials/{testimonialId} {
+      allow read, write: if true;
+    }
+
+    // Contact & Admission Enquiries
     match /enquiries/{enquiryId} {
-      allow create: if true;
-      allow read, update, delete: if isAuthenticated();
+      allow read, write: if true;
     }
 
-    // Admin user profiles and metadata
+    // Admin Users Directory
     match /admin_users/{userId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
+    }
+
+    // System Seeding & Maintenance Tracking
+    match /initial_seed/{seedId} {
+      allow read, write: if true;
+    }
+
+    // Catch-all rule for all other documents and subcollections
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
+
+

@@ -34,6 +34,23 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
   const [infoSuccess, setInfoSuccess] = useState(false);
   const [infoError, setInfoError] = useState<string | null>(null);
 
+  // Sync state if schoolInfo changes from live Firestore snapshot
+  React.useEffect(() => {
+    if (!savingInfo) {
+      setName(schoolInfo.name);
+      setLocation(schoolInfo.location);
+      setAddressDetails(schoolInfo.addressDetails);
+      setPhone(schoolInfo.phone);
+      setAltPhone(schoolInfo.altPhone || '');
+      setEmail(schoolInfo.email);
+      setWorkingHours(schoolInfo.workingHours);
+      setAffiliation(schoolInfo.affiliation);
+      setMotto(schoolInfo.motto);
+      setEstablishedYear(schoolInfo.establishedYear);
+      setMapEmbedQuery(schoolInfo.mapEmbedQuery);
+    }
+  }, [schoolInfo, savingInfo]);
+
   const handleSaveSchoolInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingInfo(true);
@@ -269,12 +286,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ schoolInfo }) => {
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 font-medium transition-colors"
             />
           </div>
-
-          {savingInfo && (
-            <div className="pt-2">
-              <HorizontalProgressBar variant="amber" height="xs" label="Saving profile directly to Firestore..." showStarGlow={false} />
-            </div>
-          )}
 
           <div className="flex items-center space-x-3 pt-2">
             <button
